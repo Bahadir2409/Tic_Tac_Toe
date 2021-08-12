@@ -16,11 +16,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void playButton(View view){
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+
                 startActivity(new Intent(MainActivity.this,PlayerSetup.class));
-            }
-        });
+        
     }
 }

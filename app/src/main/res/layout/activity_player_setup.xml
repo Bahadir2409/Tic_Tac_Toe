@@ -74,10 +74,11 @@
         android:layout_marginTop="60dp"
         android:background="@drawable/red_button"
         android:gravity="center"
+        android:onClick="submitButttonClik"
         android:text="@string/submitbutton"
         android:textColor="@color/white"
         android:textStyle="bold"
-       app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName2" />
 </androidx.constraintlayout.widget.ConstraintLayout>
