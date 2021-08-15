@@ -9,6 +9,8 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -20,7 +22,9 @@ public class TicTacToeBoard extends View {
     private final int winningLineColor;
     private final Paint paint = new Paint();
     private int cellSize = getWidth() / 3;
-    private  GameLogic game=new GameLogic();
+    private GameLogic game = new GameLogic();
+
+    private boolean winningLine=false;
 
     public TicTacToeBoard(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -53,51 +57,65 @@ public class TicTacToeBoard extends View {
     protected void onDraw(Canvas canvas) {
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
+
         drawGameBoard(canvas);
+        drawMarkers(canvas);
 
-       drawMarkers(canvas);
+        if (winningLine){
+            paint.setColor(winningLineColor);
+            drawWinningLine(canvas);
 
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-         float x=event.getX();
-         float y=event.getY();
+        float x = event.getX();
+        float y = event.getY();
 
-         int action=event.getAction();
-         if (action==MotionEvent.ACTION_DOWN){
-             int row=(int) Math.ceil(y/cellSize);
-             int col=(int) Math.ceil(x/cellSize);
+        int action = event.getAction();
+if (action==MotionEvent.ACTION_DOWN){
+    int row = (int) Math.ceil(y / cellSize);
+    int col = (int) Math.ceil(x / cellSize);
+        if (!winningLine){
+            if (game.updateGameBoard(row, col)) {
+                invalidate();
 
-             if (game.updateGameBoard(row,col)){
-                 invalidate();
-
-                 if (game.getPlayer()%2==0){
-                     game.setPlayer(game.getPlayer()-1);
-                 }
-             }
-
-             invalidate();
-             return true;
-         }
-      return false;
+                if (game.winnerCheck()){
+                    winningLine=true;
+                    invalidate();
+                }
+                //updating the players turn
+                if (game.getPlayer() % 2 == 0) {
+                    game.setPlayer(game.getPlayer() - 1);
+                } else {
+                    game.setPlayer(game.getPlayer() + 1);
+                }
+        }
+        }
+            invalidate();
+            return true;
+        }
+        return false;
     }
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-private void drawMarkers(Canvas canvas){
 
-    for (int r=0; r<3;r++){
-        for (int c=0;c<3;c++){
-            if (game.getGameBoard()[r][c]!=0){
-                if (game.getGameBoard()[r][c]==1){
-                    drawX(canvas,r,c);
-                }else {
-                    drawO(canvas,r,c);
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void drawMarkers(Canvas canvas) {
+
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 3; c++) {
+                if (game.getGameBoard()[r][c] != 0) {
+                    if (game.getGameBoard()[r][c] == 1) {
+                        drawX(canvas, r, c);
+                    } else {
+                        drawO(canvas, r, c);
+                    }
                 }
             }
         }
     }
-}
+
     private void drawGameBoard(Canvas canvas) {
         paint.setColor(boardColor);
         paint.setStrokeWidth(16);
@@ -133,5 +151,57 @@ private void drawMarkers(Canvas canvas){
                 , (float) ((row * cellSize + cellSize) - cellSize * 0.2)
                 , paint);
 
+    }
+
+    private void drawHorizontalLine(Canvas canvas,int row, int col){
+     canvas.drawLine(col
+             ,row*cellSize+(float)cellSize/2
+             ,cellSize*3
+             ,row*cellSize+(float)cellSize/2
+             ,paint);
+    }
+    private void drawVerticalLine(Canvas canvas,int row,int col){
+        canvas.drawLine(col*cellSize+(float)cellSize/2
+                ,row
+                ,col*cellSize+(float)cellSize/2
+                ,cellSize*3
+                ,paint);
+    }
+    private void drawDiagonalLinePos(Canvas canvas){
+        canvas.drawLine(0,cellSize*3,cellSize*3,0,paint);
+    }
+    private void drawDiagonalLineNega(Canvas canvas){
+        canvas.drawLine(0,0,cellSize*3,cellSize*3,paint);
+    }
+
+    private void drawWinningLine(Canvas canvas){
+        int row=game.getWinType()[0];
+        int col=game.getWinType()[1];
+
+        switch (game.getWinType()[2]){
+            case 1:
+                drawHorizontalLine(canvas,row,col);
+                break;
+            case 2:
+                drawVerticalLine(canvas,row,col);
+                break;
+            case 3:
+                drawDiagonalLineNega(canvas);
+                break;
+            case 4:
+                drawDiagonalLinePos(canvas);
+                break;
+        }
+    }
+    public void setupgame(Button playagain, Button home, TextView playerDisplay, String[] name){
+game.setPlayAgainBTN(playagain);
+game.setHomeBtn(home);
+game.setPlayerTurn(playerDisplay);
+game.setPlayerNames(name);
+
+    }
+    public void reserGame(){
+        game.resetGame();
+        winningLine=false;
     }
 }
